@@ -1,4 +1,4 @@
-from typing import Union, Type
+from typing import Type
 
 
 class InfoMessage:
@@ -81,8 +81,8 @@ class Running(Training):
 
 class SportsWalking(Training):
     """Тренировка: спортивная ходьба."""
-    CALLORIES_RATTIO_1 = 0.035
-    CALLORIES_RATTIO_2 = 0.029
+    CALLORIES_SPORT_WALK_1 = 0.035
+    CALLORIES_SPORT_WALK_2 = 0.029
     CM_IN_M = 100
     KPH_TO_MPS_MULTIPLIER = round(
         (Training.M_IN_KM / Training.MIN_IN_H ** 2), 3
@@ -99,12 +99,12 @@ class SportsWalking(Training):
         """Получить количество затраченных калорий при спортивной ходьбе."""
         return (
             (
-                self.CALLORIES_RATTIO_1 * self.weight
+                self.CALLORIES_SPORT_WALK_1 * self.weight
                 + (
                     (self.get_mean_speed() * self.KPH_TO_MPS_MULTIPLIER) ** 2
                     / (self.height / self.CM_IN_M)
                 )
-                * self.CALLORIES_RATTIO_2
+                * self.CALLORIES_SPORT_WALK_2
                 * self.weight
             )
             * self.duration
@@ -127,14 +127,12 @@ class Swimming(Training):
         self.length_pool = length_pool
         self.count_pool = count_pool
 
-        """Расчет средней скорости."""
-
     def get_mean_speed(self) -> float:
+        """Расчет средней скорости."""
         return (
             self.length_pool * self.count_pool
-            / self.M_IN_KM / self.duration
-        )
-    """Расчет ккал."""
+            / self.M_IN_KM / self.duration)
+
     def get_spent_calories(self) -> float:
         """Количество затраченных калорий."""
         return (
@@ -144,15 +142,16 @@ class Swimming(Training):
         )
 
 
-def read_package(new_type: str, data: [Union[int, float]]) -> Training:
+def read_package(new_type: str, data: list) -> Training:
     """Прочитать данные полученные от датчиков."""
-    types_dict: dict[str, Type[Training]] = {
+    packages: dict[str, Type[Training]] = {
         'SWM': Swimming,
         'RUN': Running,
         'WLK': SportsWalking
     }
-
-    return types_dict[new_type](*data)
+    if 'SWM' not in packages or 'RUN' not in packages or 'WLK' not in packages:
+        raise
+    return packages[new_type](*data)
 
 
 def main(new_training: Training) -> None:
@@ -162,7 +161,7 @@ def main(new_training: Training) -> None:
 
 
 if __name__ == '__main__':
-    packages = [
+    packages: list[tuple] = [
         ('SWM', [720, 1, 80, 25, 40]),
         ('RUN', [15000, 1, 75]),
         ('WLK', [9000, 1, 75, 180]),
